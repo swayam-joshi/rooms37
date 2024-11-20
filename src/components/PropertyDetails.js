@@ -1,34 +1,37 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import axios from "axios";
 
-function PropertyDetails() {
-  const [details, setDetails] = useState({ name: "", payment: "" });
+const PropertyDetails = () => {
+    const { propertyId } = useParams();
+    const [property, setProperty] = useState(null);
 
-  const handleSubmit = () => {
-    alert("Booking Successful!");
-  };
+    useEffect(() => {
+        const fetchPropertyDetails = async () => {
+            try {
+                const response = await axios.get(`http://url:5000/property/${propertyId}`);
+                setProperty(response.data);
+            } catch (error) {
+                console.error("Error fetching property details:", error);
+            }
+        };
 
-  return (
-    <div>
-      <h1>Book Property</h1>
-      <label>
-        Name:
-        <input
-          type="text"
-          value={details.name}
-          onChange={(e) => setDetails({ ...details, name: e.target.value })}
-        />
-      </label>
-      <label>
-        Payment Details:
-        <input
-          type="text"
-          value={details.payment}
-          onChange={(e) => setDetails({ ...details, payment: e.target.value })}
-        />
-      </label>
-      <button onClick={handleSubmit}>Submit</button>
-    </div>
-  );
-}
+        fetchPropertyDetails();
+    }, [propertyId]);
+
+    if (!property) {
+        return <p>Loading...</p>;
+    }
+
+    return (
+        <div>
+            <h1>{property.prop_name}</h1>
+            <p>{property.description}</p>
+            <p>Location: {`${property.address}, ${property.city}, ${property.state}, ${property.country}`}</p>
+            <p>Price per Night: ${property.price_nightly}</p>
+            <Link to={`/book/${property.id}`}>Book Now</Link>
+        </div>
+    );
+};
 
 export default PropertyDetails;
